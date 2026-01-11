@@ -2,6 +2,19 @@ import os
 import shutil
 import argparse
 
+def get_unique_path(destination_folder, filename):
+    """Generates a unique filename if a conflict exists."""
+    base, extension = os.path.splitext(filename)
+    counter = 1
+    unique_path = os.path.join(destination_folder, filename)
+    
+    while os.path.exists(unique_path):
+        unique_filename = f"{base}_{counter}{extension}"
+        unique_path = os.path.join(destination_folder, unique_filename)
+        counter += 1
+        
+    return unique_path
+
 def organize_folder(path: str, dry_run: bool = False) -> None:
     
     FILE_EXTENSIONS = {
@@ -39,7 +52,8 @@ def organize_folder(path: str, dry_run: bool = False) -> None:
                     if not os.path.exists(category):
                         os.makedirs(category)
                     
-                    shutil.move(file, os.path.join(category, file))
+                    dest_path = get_unique_path(category, file)
+                    shutil.move(file, dest_path)
 
                     # log changes
                     print(f"Moved: {file} -> {category}")
@@ -58,7 +72,8 @@ def organize_folder(path: str, dry_run: bool = False) -> None:
                 if not os.path.exists('Others'):
                     os.makedirs('Others')
 
-                shutil.move(file, os.path.join('Others', file))
+                dest_path = get_unique_path("Others", file)
+                shutil.move(file, dest_path)
                 print(f"Moved: {file} -> Others")
 
 if __name__ == "__main__":
