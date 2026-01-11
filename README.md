@@ -8,12 +8,12 @@ Sort the current folder where the script is located:
 python sweep.py
 ```
 
-Run in specific path
+Run in specific path:
 ```bash
 python sweep.py path/to/directory
 ```
 
-Get help
+Get help:
 ```bash
 python sweep.py --help
 ```
