@@ -1,5 +1,6 @@
 import os
 import shutil
+import argparse
 
 def organize_folder(path: str) -> None:
     
@@ -50,6 +51,12 @@ def organize_folder(path: str) -> None:
             print(f"Moved: {file} -> Others")
 
 if __name__ == "__main__":
-    target_path = "." 
-    organize_folder(target_path)
+
+    parser = argparse.ArgumentParser(description="Organize your files into categorized folders.")
+    parser.add_argument("path", nargs="?", default=".", help="Target directory path (default: current)")
+
+    args = parser.parse_args()
+
+    print(f"Organizing: {os.path.abspath(args.path)} ---")
+    organize_folder(args.path)
     print("\nCompleted. Folder organized.")
