@@ -13,6 +13,10 @@ def organize_folder(path: str) -> None:
         "Music": [".mp3", ".wav"]
     }
 
+    if not os.path.exists(path):
+        print(f"Error: The path '{path}' does not exist.")
+        exit(1)
+
     # change working directory
     os.chdir(path)
 
