@@ -1,6 +1,8 @@
 # sweep.py
 Simple python script to tidy up folder.
 
+**IMPORTANT** : By default the script ignores dotfiles (like ".env", ".gitignore") and doesn't move them anywhere.
+
 ## Usage
 
 Sort the current folder where the script is located:
@@ -20,7 +22,12 @@ python sweep.py --help
 
 See what would happen without actually moving any files:
 ```bash
-python sweep.py --dry-run
+python sweep.py --dry-run path/to/directory
+```
+
+Create folder for dotfiles (like: .env, .gitignore)
+```bash
+python sweep.py --config path/to/directory
 ```
 
 ## TODO

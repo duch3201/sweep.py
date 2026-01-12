@@ -15,7 +15,7 @@ def get_unique_path(destination_folder, filename):
         
     return unique_path
 
-def organize_folder(path: str, dry_run: bool = False) -> None:
+def organize_folder(path: str, dry_run: bool = False, handle_config: bool = False) -> None:
     
     FILE_EXTENSIONS = {
         "Images" : [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"],
@@ -31,8 +31,25 @@ def organize_folder(path: str, dry_run: bool = False) -> None:
 
     for file in os.listdir():
 
-        # ignore directories and script
-        if file == "sweep.py" or os.path.isdir(file): continue
+        # ignore directories and script itself
+        if file == "sweep.py" or os.path.isdir(file):
+            continue
+
+        # handle hidden/config files (dotfiles)
+        if file.startswith("."):
+            if handle_config:
+                if dry_run:
+                    print(f"[Dry Run] Would move config: {file} -> Config")
+                else:
+                    if not os.path.exists("Config"):
+                        os.makedirs("Config")
+
+                    dest_path = get_unique_path("Config", file)
+                    shutil.move(file, dest_path)
+                    print(f"Moved config: {file} -> Config")
+
+            # if not handling config skip files not starting with dot
+            continue
 
         # get file extension
         _, extension = os.path.splitext(file)
@@ -82,6 +99,7 @@ if __name__ == "__main__":
 
     parser.add_argument("path", nargs="?", default=".", help="Target directory path (default: current)") # path to the target directory
     parser.add_argument("--dry-run", action="store_true", help="Simulate the organization without making changes") # dry run option
+    parser.add_argument("--config", action="store_true", help="Also organize hidden config files (dotfiles) into 'Config' folder") # handle config files option
 
     args = parser.parse_args()
 
@@ -93,7 +111,7 @@ if __name__ == "__main__":
 
     print(f"--- Organizing: {os.path.abspath(args.path)}{mode_label} ---")
 
-    organize_folder(args.path, dry_run=args.dry_run)
+    organize_folder(args.path, dry_run=args.dry_run, handle_config=args.config)
 
     if not args.dry_run:
         print("\nCompleted. Folder organized.")
