@@ -25,9 +25,14 @@ See what would happen without actually moving any files:
 python sweep.py --dry-run path/to/directory
 ```
 
-Create folder for dotfiles (like: .env, .gitignore)
+Create folder for dotfiles (like: .env, .gitignore):
 ```bash
 python sweep.py --config path/to/directory
+```
+
+Ignore files that .gitignore contains:
+```bash
+python sweep.py --gitignore path/to/directory
 ```
 
 ## TODO

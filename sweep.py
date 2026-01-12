@@ -1,6 +1,7 @@
 import os
 import shutil
 import argparse
+import fnmatch
 
 def get_unique_path(destination_folder, filename):
     """Generates a unique filename if a conflict exists."""
@@ -15,7 +16,7 @@ def get_unique_path(destination_folder, filename):
         
     return unique_path
 
-def organize_folder(path: str, dry_run: bool = False, handle_config: bool = False) -> None:
+def organize_folder(path: str, dry_run: bool = False, handle_config: bool = False, use_gitignore: bool = False) -> None:
     
     FILE_EXTENSIONS = {
         "Images" : [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"],
@@ -28,6 +29,22 @@ def organize_folder(path: str, dry_run: bool = False, handle_config: bool = Fals
 
     # change working directory
     os.chdir(path)
+
+    # load patterns from .gitignore if requested
+    gitignore_patterns = []
+    if use_gitignore and os.path.exists(".gitignore"):
+        with open(".gitignore", "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                
+                gitignore_patterns.append(line.rstrip("/"))
+
+    def is_ignored_by_gitignore(name: str) -> bool:
+        if not gitignore_patterns:
+            return False
+        return any(fnmatch.fnmatch(name, pattern) for pattern in gitignore_patterns)
 
     for file in os.listdir():
 
@@ -48,7 +65,13 @@ def organize_folder(path: str, dry_run: bool = False, handle_config: bool = Fals
                     shutil.move(file, dest_path)
                     print(f"Moved config: {file} -> Config")
 
-            # if not handling config skip files not starting with dot
+            # if not handling config, just skip dotfiles
+            continue
+
+        # skip files ignored via .gitignore (if enabled)
+        if is_ignored_by_gitignore(file):
+            if dry_run:
+                print(f"[Dry Run] Ignored by .gitignore: {file}")
             continue
 
         # get file extension
@@ -100,6 +123,7 @@ if __name__ == "__main__":
     parser.add_argument("path", nargs="?", default=".", help="Target directory path (default: current)") # path to the target directory
     parser.add_argument("--dry-run", action="store_true", help="Simulate the organization without making changes") # dry run option
     parser.add_argument("--config", action="store_true", help="Also organize hidden config files (dotfiles) into 'Config' folder") # handle config files option
+    parser.add_argument("--gitignore", action="store_true", help="Ignore files matching patterns from .gitignore in the target directory") # use .gitignore patterns
 
     args = parser.parse_args()
 
@@ -111,7 +135,7 @@ if __name__ == "__main__":
 
     print(f"--- Organizing: {os.path.abspath(args.path)}{mode_label} ---")
 
-    organize_folder(args.path, dry_run=args.dry_run, handle_config=args.config)
+    organize_folder(args.path, dry_run=args.dry_run, handle_config=args.config, use_gitignore=args.gitignore)
 
     if not args.dry_run:
         print("\nCompleted. Folder organized.")
